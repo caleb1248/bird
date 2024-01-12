@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="src/style.css" />
+    <script src="eruda.js" onload="eruda.init()"></script>
+    <title>bird</title>
+  </head>
+  <body>
+    <h1 style="font-weight: normal;">Flappy bird</h1>
+    <div
+      style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap"
+    >
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        Backwards
+        <label class="switch">
+          <input
+            type="checkbox"
+            onchange="setBackwards(this.checked); this.blur()"
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        Upside-down
+        <label class="switch">
+          <input
+            type="checkbox"
+            onchange="setFlip(this.checked); this.blur()"
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        Pipe control
+        <label class="switch">
+          <input
+            type="checkbox"
+            onchange="pipeControl = this.checked; this.blur()"
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        Mode
+        <input
+          type="range"
+          max="2"
+          value="0"
+          width="150px"
+          oninput="mode = this.value"
+        />
+      </div>
+
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        <span id="speedDisplay">Speed: 4</span>
+        <input
+          type="range"
+          max="30"
+          value="4"
+          oninput="speedDisplay.innerHTML = 'Speed: ' + Math.abs(playerSpeed=(this.value) * (backwards?-1:1));"
+        />
+      </div>
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        <span id="rateMonitor">Pole spawn interval: 1.5s</span>
+        <input
+          type="range"
+          max="30"
+          value="15"
+          oninput="rateMonitor.innerHTML = `Pole span rate: ${(this.value / 10)%1==0?(this.value/10)+'.0':this.value/10}s`;setPolerate(this.value * 100);console.log(poleRate)"
+        />
+      </div>
+      <div
+        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
+      >
+        <span id="gravityControl">Gravity: 0.5</span>
+        <input
+          type="range"
+          max="200"
+          value="30"
+          oninput="gravityControl.innerHTML = `Gravity: ${(defaultGravity = Math.sign(defaultGravity) * this.value / 100)}`;"
+        />
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 5px">
+        <span id="poleGapMonitor">Pole gap: 150</span>
+        <input
+          type="range"
+          max="300"
+          value="150"
+          oninput="poleGapMonitor.innerHTML = `Pole gap: ${(poleGap = this.value)}`;"
+        />
+      </div>
+    </div>
+
+    <div class="canvas-container"></div>
+
+    <script src="src/main.js"></script>
+  </body>
+</html>
