@@ -3,76 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="src/style.css" />
     <script src="eruda.js" onload="eruda.init()"></script>
     <title>bird</title>
+    <script src="eruda.js" onload="eruda.init()"></script>
   </head>
   <body>
-    <h1 style="font-weight: normal;">Flappy bird</h1>
+    <h1 style="font-weight: normal">Flappy bird</h1>
     <div
-      style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap"
+      style="
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      "
     >
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         Backwards
         <label class="switch">
-          <input
-            type="checkbox"
-            onchange="setBackwards(this.checked); this.blur()"
-          />
+          <input type="checkbox" id="backwards-toggle" />
           <span class="slider"></span>
         </label>
       </div>
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         Upside-down
         <label class="switch">
-          <input
-            type="checkbox"
-            onchange="setFlip(this.checked); this.blur()"
-          />
+          <input type="checkbox" id="flip-toggle" />
           <span class="slider"></span>
         </label>
       </div>
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         Pipe control
         <label class="switch">
-          <input
-            type="checkbox"
-            onchange="pipeControl = this.checked; this.blur()"
-          />
+          <input type="checkbox" id="control-toggle" />
           <span class="slider"></span>
         </label>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: center;">
+      <div class="idk">
         Mode
-        <input
-          type="range"
-          max="2"
-          value="0"
-          width="150px"
-          oninput="mode = this.value"
-        />
+        <input type="range" max="2" value="0" width="150px" id="mode-control" />
       </div>
 
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         <span id="speedDisplay">Speed: 4</span>
-        <input
-          type="range"
-          max="30"
-          value="4"
-          oninput="speedDisplay.innerHTML = 'Speed: ' + Math.abs(playerSpeed=(this.value) * (backwards?-1:1));"
-        />
+        <input type="range" max="30" value="4" id="speed-control" />
       </div>
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         <span id="rateMonitor">Pole spawn interval: 1.5s</span>
         <input
           type="range"
@@ -81,9 +57,7 @@
           oninput="rateMonitor.innerHTML = `Pole span rate: ${(this.value / 10)%1==0?(this.value/10)+'.0':this.value/10}s`;setPolerate(this.value * 100);console.log(poleRate)"
         />
       </div>
-      <div
-        style="display: flex; flex-direction: column; align-items: center; gap: 5px;"
-      >
+      <div class="idk">
         <span id="gravityControl">Gravity: 0.5</span>
         <input
           type="range"
@@ -92,7 +66,14 @@
           oninput="gravityControl.innerHTML = `Gravity: ${(defaultGravity = Math.sign(defaultGravity) * this.value / 100)}`;"
         />
       </div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 5px">
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+        "
+      >
         <span id="poleGapMonitor">Pole gap: 150</span>
         <input
           type="range"
@@ -105,6 +86,6 @@
 
     <div class="canvas-container"></div>
 
-    <script src="src/main.js"></script>
+    <script type="module" src="src/main.ts"></script>
   </body>
 </html>

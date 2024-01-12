@@ -4,7 +4,6 @@ body {
   flex-direction: column;
 
   perspective: 1000px;
-  overflow: hidden;
 }
 
 .switch {
@@ -31,6 +30,13 @@ body {
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 34px;
+}
+
+.idk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 .slider:before {
