@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="eruda.js" onload="eruda.init()"></script>
     <title>bird</title>
-    <script src="eruda.js" onload="eruda.init()"></script>
   </head>
   <body>
     <h1 style="font-weight: normal">Flappy bird</h1>
@@ -50,21 +49,11 @@
       </div>
       <div class="idk">
         <span id="rateMonitor">Pole spawn interval: 1.5s</span>
-        <input
-          type="range"
-          max="30"
-          value="15"
-          oninput="rateMonitor.innerHTML = `Pole span rate: ${(this.value / 10)%1==0?(this.value/10)+'.0':this.value/10}s`;setPolerate(this.value * 100);console.log(poleRate)"
-        />
+        <input type="range" max="30" value="15" id="rate-control" />
       </div>
       <div class="idk">
-        <span id="gravityControl">Gravity: 0.5</span>
-        <input
-          type="range"
-          max="200"
-          value="30"
-          oninput="gravityControl.innerHTML = `Gravity: ${(defaultGravity = Math.sign(defaultGravity) * this.value / 100)}`;"
-        />
+        <span id="gravityMonitor">Gravity: 0.5</span>
+        <input type="range" max="200" value="30" id="gravity-control" />
       </div>
       <div
         style="
@@ -75,12 +64,7 @@
         "
       >
         <span id="poleGapMonitor">Pole gap: 150</span>
-        <input
-          type="range"
-          max="300"
-          value="150"
-          oninput="poleGapMonitor.innerHTML = `Pole gap: ${(poleGap = this.value)}`;"
-        />
+        <input type="range" max="300" value="150" id="gap-control" />
       </div>
     </div>
 
