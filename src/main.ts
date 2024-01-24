@@ -142,8 +142,7 @@ let prevY = playerY;
 
 let score = 0;
 
-
-let poles: { x: number; y: number; }[] = [];
+let poles: { x: number; y: number }[] = [];
 
 let hasCrashed = false;
 let isOnHomeScreen = true;
@@ -159,7 +158,7 @@ function drawBird() {
   ctx.beginPath();
   ctx.lineWidth = 20;
   if (trail[0]) ctx.moveTo(trail[0].x, trail[0].y);
-  
+
   trail = trail.filter(({ x, y }, i) => {
     trail[i].x -= hasCrashed ? 0 : playerSpeed;
     x -= playerSpeed;
@@ -192,7 +191,7 @@ function drawScore() {
   ctx.fillText(score.toString(), canvas.width / 2, 50);
 }
 
-function drawPole({ x, y }: typeof poles[number]) {
+function drawPole({ x, y }: (typeof poles)[number]) {
   ctx.drawImage(pipeTopImg, x, y - poleGap / 2 - poleHeight);
   ctx.drawImage(pipeBottomImg, x, y + poleGap / 2);
 }
@@ -351,10 +350,10 @@ $("#control-toggle").on("change", (t) => {
   t.blur();
 });
 
-$("#trail-toggle").on('change', t => {
+$("#trail-toggle").on("change", (t) => {
   trailEnabled = t.checked;
   t.blur();
-})
+});
 
 $("#mode-control").on("input", (t) => {
   mode = +t.value;
