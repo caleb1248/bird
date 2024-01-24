@@ -1,13 +1,13 @@
-import './style.css';
-import bgUrl from './assets/bg.png';
-import bird1Url from './assets/bird1.png';
-import bird2Url from './assets/bird2.png';
-import bird3Url from './assets/bird3.png';
-import deadBirdUrl from './assets/deadbird.png';
-import homeScreenUrl from './assets/flappy_start.png';
-import gameOverUrl from './assets/game_over.png';
-import pipeBottomUrl from './assets/pipe_bottom.png';
-import pipeTopUrl from './assets/pipe_top.png';
+import "./style.css";
+import bgUrl from "./assets/bg.png";
+import bird1Url from "./assets/bird1.png";
+import bird2Url from "./assets/bird2.png";
+import bird3Url from "./assets/bird3.png";
+import deadBirdUrl from "./assets/deadbird.png";
+import homeScreenUrl from "./assets/flappy_start.png";
+import gameOverUrl from "./assets/game_over.png";
+import pipeBottomUrl from "./assets/pipe_bottom.png";
+import pipeTopUrl from "./assets/pipe_top.png";
 
 // @ts-ignore
 const $ = (
@@ -27,18 +27,22 @@ const $ = (
   } as HTMLInputElement & { on: (type: string, l: (t: HTMLInputElement) => void) => void });
 };
 
-const canvas = document
-  .querySelector('.canvas-container')
-  ?.appendChild(document.createElement('canvas'))!;
+const canvasContainer = document.querySelector(".canvas-container")!;
+const canvas = canvasContainer.appendChild(document.createElement("canvas"));
 canvas.width = 600;
 canvas.height = 500;
-const ctx = canvas.getContext('2d')!;
-ctx.font = '30px Comic Sans MS, Comic Sans';
-ctx.textAlign = 'center';
+
+const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+ctx.font = "30px Comic Sans MS, Comic Sans";
+ctx.textAlign = "center";
+ctx.lineCap = "round";
+
+// Controls
 let pipeControl = false;
 let flip = false;
 let backwards = false;
 let mode = 0;
+let trailEnabled = false;
 
 let playerX = backwards ? canvas.width - 100 : 100,
   playerInitialY = 200,
@@ -70,6 +74,8 @@ function calculateMinMax() {
     maxPoleY = x;
   }
 }
+
+ctx.strokeStyle = "lightgreen";
 
 calculateMinMax();
 
@@ -132,21 +138,44 @@ let lastPerformance = performance.now();
 let gravity = defaultGravity;
 let fallSpeed = 0;
 let playerY = playerInitialY;
+let prevY = playerY;
 
 let score = 0;
 
-let poles: { x: number; y: number }[] = [];
+
+let poles: { x: number; y: number; }[] = [];
 
 let hasCrashed = false;
 let isOnHomeScreen = true;
 
 let poleRate = 1500;
 
+let trail = [{ x: playerX, y: playerY }];
+
 function drawBird() {
+  if (trailEnabled)
+    trail.push({ x: playerX + playerWidth / 2, y: playerY + playerWidth / 2 });
+
+  ctx.beginPath();
+  ctx.lineWidth = 20;
+  if (trail[0]) ctx.moveTo(trail[0].x, trail[0].y);
+  
+  trail = trail.filter(({ x, y }, i) => {
+    trail[i].x -= hasCrashed ? 0 : playerSpeed;
+    x -= playerSpeed;
+    if (x < -20 || x > 620) return false;
+    ctx.lineTo(x - 5, y - 5);
+    return true;
+  });
+  ctx.stroke();
   ctx.save();
   ctx.translate(playerX + playerWidth / 2, playerY + playerHeight / 2);
-  if (flip) ctx.scale(1, -1);
-  if (backwards) ctx.scale(-1, 1);
+  if (flip && mode == 0) ctx.scale(1, -1);
+
+  if (backwards && mode == 0) ctx.scale(-1, 1);
+  if (mode != 0 && !hasCrashed) {
+    ctx.rotate(Math.atan2(playerY - prevY, playerSpeed));
+  }
   if (hasCrashed) {
     ctx.drawImage(
       deadBird,
@@ -163,7 +192,7 @@ function drawScore() {
   ctx.fillText(score.toString(), canvas.width / 2, 50);
 }
 
-function drawPole({ x, y }: { x: number; y: number }) {
+function drawPole({ x, y }: typeof poles[number]) {
   ctx.drawImage(pipeTopImg, x, y - poleGap / 2 - poleHeight);
   ctx.drawImage(pipeBottomImg, x, y + poleGap / 2);
 }
@@ -189,12 +218,16 @@ function isDead() {
   });
 }
 
+/**
+ * @param {number} newValue
+ */
 function setPolerate(newValue: number) {
   poleRate = newValue;
 }
 
 function home() {
   keyDown = false;
+  trail.length = 0;
   ctx.drawImage(bg, 0, canvas.height - bg.height);
   ctx.drawImage(
     homeScreen,
@@ -210,8 +243,11 @@ function home() {
 }
 
 function frame() {
+  prevY = playerY;
   ctx.drawImage(bg, 0, canvas.height - bg.height);
   fallSpeed += gravity;
+  if (mode == 2)
+    fallSpeed = playerSpeed * 1.5 * (keyDown ? -1 : 1) * (flip ? -1 : 1);
   if (!pipeControl || hasCrashed) playerY += fallSpeed;
 
   if (mode == 1 && keyDown) {
@@ -234,6 +270,7 @@ function frame() {
   drawBird();
 
   removePoles();
+
   !hasCrashed && isDead() && (hasCrashed = true);
   if (
     (!flip && playerY + playerHeight > canvas.height) ||
@@ -268,23 +305,27 @@ function jump() {
     isOnHomeScreen = false;
   }
   if (!hasCrashed) {
-    mode == 2
+    mode == 3
       ? (setFlip(!flip), (gravity = defaultGravity))
-      : mode == 1
+      : mode == 1 || mode == 2
       ? (keyDown = true)
       : ((fallSpeed = jumpSpeed), (gravity = defaultGravity));
   }
 }
 
-addEventListener('keydown', ({ key, repeat }) => {
-  if (key == ' ' && !repeat) jump();
+addEventListener("keydown", (e) => {
+  if (/ArrowUp| /.test(e.key) && !e.repeat) {
+    e.preventDefault();
+    canvasContainer.scrollIntoView({ behavior: "smooth" });
+    jump();
+  }
 });
-addEventListener('keyup', ({ key }) =>
-  key === ' ' ? (keyDown = false) : null
+addEventListener("keyup", ({ key }) =>
+  key === " " ? (keyDown = false) : null
 );
 
-canvas.addEventListener('mousedown', () => jump());
-canvas.addEventListener('mouseup', () => (keyDown = false));
+canvas.addEventListener("mousedown", () => jump());
+canvas.addEventListener("mouseup", () => (keyDown = false));
 
 const newPole = () =>
   poles.push({
@@ -295,45 +336,50 @@ const newPole = () =>
 setInterval(() => (birdIndex = (birdIndex + 1) % 4), 100);
 home();
 
-$('#backwards-toggle').on('change', (t) => {
+$("#backwards-toggle").on("change", (t) => {
   setBackwards(t.checked);
   t.blur();
 });
 
-$('#flip-toggle').on('change', (t) => {
+$("#flip-toggle").on("change", (t) => {
   setFlip(t.checked);
   t.blur();
 });
 
-$('#control-toggle').on('change', (t) => {
+$("#control-toggle").on("change", (t) => {
   pipeControl = t.checked;
   t.blur();
 });
 
-$('#mode-control').on('input', (t) => {
+$("#trail-toggle").on('change', t => {
+  trailEnabled = t.checked;
+  t.blur();
+})
+
+$("#mode-control").on("input", (t) => {
   mode = +t.value;
 });
 
-$('#speed-control').on('input', (t) => {
-  $('#speedDisplay').innerHTML =
-    'Speed: ' + Math.abs((playerSpeed = +t.value * (backwards ? -1 : 1)));
+$("#speed-control").on("input", (t) => {
+  $("#speedDisplay").innerHTML =
+    "Speed: " + Math.abs((playerSpeed = +t.value * (backwards ? -1 : 1)));
 });
 
-$('#rate-control').on('input', (t) => {
-  $('#rateMonitor').innerHTML = `Pole span rate: ${
-    (+t.value / 10) % 1 == 0 ? +t.value / 10 + '.0' : +t.value / 10
+$("#rate-control").on("input", (t) => {
+  $("#rateMonitor").innerHTML = `Pole span rate: ${
+    (+t.value / 10) % 1 == 0 ? +t.value / 10 + ".0" : +t.value / 10
   }s`;
   setPolerate(+t.value * 100);
 });
 
-$('#gravity-control').on(
-  'input',
+$("#gravity-control").on(
+  "input",
   (t) =>
-    ($('#gravityMonitor').innerHTML = `Gravity: ${(defaultGravity =
+    ($("#gravityMonitor").innerHTML = `Gravity: ${(defaultGravity =
       (Math.sign(defaultGravity) * +t.value) / 100)}`)
 );
 
-$('#gap-control').on(
-  'input',
-  (t) => ($('#poleGapMonitor').innerHTML = `Pole gap: ${setPoleGap(+t.value)}`)
+$("#gap-control").on(
+  "input",
+  (t) => ($("#poleGapMonitor").innerHTML = `Pole gap: ${setPoleGap(+t.value)}`)
 );
