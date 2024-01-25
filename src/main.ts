@@ -18,13 +18,16 @@ const $ = (
     listener: (tg: HTMLInputElement) => void
   ): void;
 } => {
-  const elem = document.querySelector(e) as HTMLInputElement;
-
-  return Object.assign(elem!, {
-    on(type, l) {
-      this.addEventListener(type, () => l(this));
-    },
-  } as HTMLInputElement & { on: (type: string, l: (t: HTMLInputElement) => void) => void });
+  return Object.assign(
+    document.querySelector(e) as HTMLInputElement,
+    {
+      on(type, l) {
+        this.addEventListener(type, () => l(this));
+      },
+    } as HTMLInputElement & {
+      on: (type: string, l: (t: HTMLInputElement) => void) => void;
+    }
+  );
 };
 
 const canvasContainer = document.querySelector(".canvas-container")!;
@@ -81,7 +84,7 @@ calculateMinMax();
 
 function setBackwards(newBackwards: boolean) {
   backwards = newBackwards;
-  playerX = backwards ? canvas.width - 100 : 100;
+  playerX = backwards ? canvas.width - 100 - playerWidth : 100;
   playerSpeed = backwards ? 0 - Math.abs(playerSpeed) : Math.abs(playerSpeed);
   poleSpawn = backwards ? 0 - poleWidth : canvas.width;
 }
@@ -92,7 +95,6 @@ function setFlip(newFlipped: boolean) {
   defaultGravity = flip
     ? 0 - Math.abs(defaultGravity)
     : Math.abs(defaultGravity);
-  console.log(defaultGravity);
 }
 
 function setPoleGap(newGap: number) {
@@ -169,13 +171,16 @@ function drawBird() {
   ctx.stroke();
   ctx.save();
   ctx.translate(playerX + playerWidth / 2, playerY + playerHeight / 2);
-  if (flip && mode == 0) ctx.scale(1, -1);
 
-  if (backwards && mode == 0) ctx.scale(-1, 1);
-  if (mode != 0 && !hasCrashed) {
-    ctx.rotate(Math.atan2(playerY - prevY, playerSpeed));
+  if (flip) ctx.scale(1, -1);
+  if (backwards) ctx.scale(-1, 1);
+  if (mode != 0) {
+    ctx.rotate(
+      Math.atan2(playerY - prevY, Math.abs(playerSpeed)) * (flip ? -1 : 1)
+    );
   }
-  if (hasCrashed) {
+
+  if (hasCrashed && mode == 0) {
     ctx.drawImage(
       deadBird,
       playerWidth / 2 - playerHeight,
@@ -246,7 +251,8 @@ function frame() {
   ctx.drawImage(bg, 0, canvas.height - bg.height);
   fallSpeed += gravity;
   if (mode == 2)
-    fallSpeed = playerSpeed * 1.5 * (keyDown ? -1 : 1) * (flip ? -1 : 1);
+    fallSpeed =
+      Math.abs(playerSpeed) * 1.5 * (keyDown ? -1 : 1) * (flip ? -1 : 1);
   if (!pipeControl || hasCrashed) playerY += fallSpeed;
 
   if (mode == 1 && keyDown) {
@@ -285,6 +291,7 @@ function frame() {
       isOnHomeScreen = true;
       playerY = playerInitialY;
       gravity = defaultGravity;
+      playerSpeed = +$('#speed-control').value * (backwards?-1:1)
       fallSpeed = 0;
       hasCrashed = false;
 
