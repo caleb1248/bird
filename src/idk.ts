@@ -44,7 +44,6 @@ ctx.lineCap = "round";
 let pipeControl = false;
 let flip = false;
 let backwards = false;
-let mode = 0;
 let trailEnabled = false;
 
 let playerX = backwards ? canvas.width - 100 : 100,
@@ -172,21 +171,12 @@ function drawBird() {
 
   if (flip) ctx.scale(1, -1);
   if (backwards) ctx.scale(-1, 1);
-  if (mode != 0) {
-    ctx.rotate(
-      Math.atan2(playerY - prevY, Math.abs(playerSpeed)) * (flip ? -1 : 1)
-    );
-  }
+  ctx.rotate(
+    Math.atan2(playerY - prevY, Math.abs(playerSpeed)) * (flip ? -1 : 1)
+  );
 
-  if (hasCrashed && mode == 0) {
-    ctx.drawImage(
-      deadBird,
-      playerWidth / 2 - playerHeight,
-      playerHeight / 2 - playerWidth
-    );
-  } else {
-    ctx.drawImage(birds[birdIndex], 0 - playerWidth / 2, 0 - playerHeight / 2);
-  }
+  ctx.drawImage(birds[birdIndex], 0 - playerWidth / 2, 0 - playerHeight / 2);
+
   ctx.restore();
 }
 
