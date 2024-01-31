@@ -45,6 +45,7 @@ let pipeControl = false;
 let flip = false;
 let backwards = false;
 let trailEnabled = false;
+let mode = 0;
 
 let playerX = backwards ? canvas.width - 100 : 100,
   playerInitialY = 200,
@@ -98,13 +99,14 @@ function setFlip(newFlipped: boolean) {
     : Math.abs(defaultGravity);
 }
 
-function setPoleGap(newGap: number) {
-  poleGap = newGap;
-  calculateMinMax();
-}
+const setPoleGap = (newGap: number) => (
+  (poleGap = newGap), calculateMinMax(), newGap
+);
 
 let homeWidth = 460,
   homeHeight = 366;
+
+let poleSlope = 20 / poleWidth;
 
 const homeScreen = new Image(homeWidth, homeHeight);
 homeScreen.src = homeScreenUrl;
@@ -222,6 +224,7 @@ function home() {
   if (!isOnHomeScreen) {
     score = 0;
     poles = [];
+    lastPole = canvas.height / 2;
     requestAnimationFrame(frame);
   } else requestAnimationFrame(home);
 }
@@ -229,13 +232,15 @@ function home() {
 function frame() {
   prevY = playerY;
   ctx.drawImage(bg, 0, canvas.height - bg.height);
-  fallSpeed += gravity;
-  if (!pipeControl || hasCrashed) playerY += fallSpeed;
 
-  if (keyDown) {
-    fallSpeed -= gravity * 2;
+  if (mode == 0) {
+    fallSpeed += gravity * (keyDown ? -1 : 1);
     if (Math.abs(fallSpeed) > 10) fallSpeed = Math.sign(fallSpeed) * 10;
+  } else if (mode == 1) {
+    fallSpeed = poleSlope * playerSpeed * (flip ? -1 : 1) * (keyDown ? -1 : 1);
   }
+
+  if (!pipeControl || hasCrashed) playerY += fallSpeed;
 
   if (Math.abs(fallSpeed) > 10) fallSpeed = Math.sign(fallSpeed) * 10;
 
@@ -342,10 +347,13 @@ $("#trail-toggle").on("change", (t) => {
   t.blur();
 });
 
-$("#mode-control").remove();
-$("#speed-control").remove();
-$("#rate-control").remove();
-$("#gravity-control").remove();
+const modeControl = $("#mode-control");
+modeControl.max = "1";
+modeControl.on("input", (t) => (mode = t.valueAsNumber));
+
+$("#speed-control").parentElement?.remove();
+$("#rate-control").parentElement?.remove();
+$("#gravity-control").parentElement?.remove();
 $("#gap-control").on(
   "input",
   (t) => ($("#poleGapMonitor").innerHTML = `Pole gap: ${setPoleGap(+t.value)}`)
